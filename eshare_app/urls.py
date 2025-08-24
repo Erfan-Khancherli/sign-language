@@ -20,5 +20,6 @@ from word import urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('account/', include('accounts.urls')),
-    path('Alphabet/' , include('word.urls'))
+    path('words/' , include('word.urls')),
+    path('favorite/' , include('favorite.urls')),
 ]
