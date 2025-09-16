@@ -22,3 +22,17 @@ This project is a **backend application** designed to help deaf people learn **s
    ```bash
    git clone https://github.com/Erfan-Khancherli/sign-language.git
    cd sign-language
+2. Create a virtual environment and activate it:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate   # Linux/macOS
+   venv\Scripts\activate      # Windows
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+4. Apply migrations:
+   ```bash
+   python manage.py migrate
+5. Run the development server:
+   ```bash
+   python manage.py runserver
