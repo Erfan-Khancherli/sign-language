@@ -22,4 +22,5 @@ urlpatterns = [
     path('account/', include('accounts.urls')),
     path('words/' , include('word.urls')),
     path('favorite/' , include('favorite.urls')),
+    path('packages/' , include('packages.urls')),
 ]

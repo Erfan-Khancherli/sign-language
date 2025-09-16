@@ -10,19 +10,22 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('favorite', '0001_initial'),
+        ('word', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Category',
+            name='Packages',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created_at', models.DateTimeField(auto_now_add=True, null=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('image', models.ImageField(upload_to='images/dynamic/words/category/')),
-                ('category_title', models.CharField(max_length=20, unique=True)),
+                ('name', models.CharField(max_length=100)),
+                ('description', models.TextField(blank=True)),
+                ('price', models.DecimalField(decimal_places=2, max_digits=10)),
+                ('duration_days', models.IntegerField(blank=True, null=True)),
+                ('categories', models.ManyToManyField(to='word.category')),
                 ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
@@ -30,17 +33,31 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='Words',
+            name='PackageCategory',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created_at', models.DateTimeField(auto_now_add=True, null=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('image', models.ImageField(upload_to='images/dynamic/words/')),
-                ('title', models.CharField(max_length=20)),
-                ('description', models.TextField()),
                 ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='word.category')),
                 ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('favorite', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='favorite.favorite')),
+                ('packages', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='packages.packages')),
+            ],
+            options={
+                'abstract': False,
+            },
+        ),
+        migrations.CreateModel(
+            name='UserPackage',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('created_at', models.DateTimeField(auto_now_add=True, null=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
+                ('start_date', models.DateField(auto_now_add=True)),
+                ('end_date', models.DateField(blank=True, null=True)),
+                ('is_active', models.BooleanField(default=True)),
+                ('payment_id', models.CharField(blank=True, max_length=50, null=True)),
+                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('package', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='packages.packages')),
             ],
             options={
                 'abstract': False,
