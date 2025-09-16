@@ -9,7 +9,7 @@ This project is a **backend application** designed to help deaf people learn **s
 - Favorite words management
 - Supports multiple packages for learning
 - Built with **Python** and **Django**
-- Ecommerce(Next feature)
+- Ecommerce (Next feature)
 ## Tech Stack
 
 - **Backend:** Python, Django
