@@ -2,11 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser , PermissionsMixin , BaseUserManager
 from django.core import validators
 
-
-
-
-
-
 class CustomUserManager(BaseUserManager):
     def create_user(self , phone_number , first_name , last_name,password = None):
         if not phone_number:
@@ -18,7 +13,6 @@ class CustomUserManager(BaseUserManager):
         if not last_name:
             raise ValueError("User must have a last name")
         user = self.model()
-        # user = self.model(email = self.normalize_email(email))
         user.phone_number = phone_number
         user.first_name = first_name
         user.last_name  = last_name
@@ -36,7 +30,6 @@ class CustomUserManager(BaseUserManager):
             raise ValueError("User must have a first name")
         if not last_name:
             raise ValueError("User must have a last name")
-
         user = self.model()
         user.phone_number = phone_number
         user.first_name = first_name
@@ -48,12 +41,6 @@ class CustomUserManager(BaseUserManager):
         return user
     
 class CustomUser(AbstractBaseUser):
-    # ADMIN = 'admin'
-    # STAFF = 'staff'
-    # STAUS = [
-    #     (ADMIN , ('Admin User')),
-    #     (STAFF, ('Staff user')),
-    # ]
     phone_number = models.CharField(max_length=11 , unique=True,
           validators=[
               validators.RegexValidator(
@@ -69,14 +56,11 @@ class CustomUser(AbstractBaseUser):
     first_name = models.CharField(('first name'), max_length=30)
     last_name = models.CharField(('last name'), max_length=30)
     is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)  # a admin user; non super-user
+    is_staff = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
-
     USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = ['first_name', 'last_name']
-
     objects = CustomUserManager()
-    
     def __str__(self):
         return "{}".format(self.first_name)
 

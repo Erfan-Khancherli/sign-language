@@ -1,5 +1,4 @@
 from django.db import models
-
 from word.common import CommonModelInfo
 from word.models import Category
 from django.contrib.auth.models import User
