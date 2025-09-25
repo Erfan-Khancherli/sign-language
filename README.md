@@ -33,6 +33,9 @@ This project is a **backend application** designed to help deaf people learn **s
 4. Apply migrations:
    ```bash
    python manage.py makemigrations
+5. See all urls:
+   ```bash
+   python manage.py show_urls
    python manage.py migrate
 5. Run the development server:
    ```bash
