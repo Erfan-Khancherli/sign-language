@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'word',
     'favorite',
     'packages',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
