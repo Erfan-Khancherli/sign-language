@@ -22,17 +22,9 @@ from django.shortcuts import get_object_or_404
 class PackageAPIView(APIView):
     permission_classes = (IsAuthenticated,)
     def post(self, request):
- # Pop categories from request data (default empty list if missing)
         category_ids = request.data["categories"]
-        print(category_ids)
-        # Validation: ensure at least one category if required
-        # if not category_ids:
-        #     return Response(
-        #         {"categories": "This field is required as a list[]."},
-        #         status=status.HTTP_400_BAD_REQUEST
-        #     )
-
-        # Create package
+        if len(category_ids)==0:
+            return Response({"category list can not be empty."},status=status.HTTP_400_BAD_REQUEST)
         serializer = PackageSerializer(data=request.data)
         if serializer.is_valid():
             package = serializer.save(created_by = request.user)
@@ -56,23 +48,42 @@ class PackageAPIView(APIView):
         return Response(serializer.data)
 
     def put(self, request, pk):
-        package = get_object_or_404(Package, pk=pk)
+        package = get_object_or_404(Packages, pk=pk)
         data = request.data.copy()
-        categories = data.pop("categories", [])
+        if "categories" in request.data:
+            category_ids = request.data["categories"]
 
-        serializer = PackageSerializer(package, data=data, partial=True)
-        if serializer.is_valid():
-            package = serializer.save()
+            serializer = PackageSerializer(package, data=data, partial=True)
+            if serializer.is_valid():
+                package = serializer.save(created_by = request.user)
 
-            # reset categories
-            PackageCategory.objects.filter(package=package).delete()
-            for cat_id in categories:
-                if Category.objects.filter(id=cat_id).exists():
-                    PackageCategory.objects.create(package=package, category_id=cat_id)
+                # reset categories
+                PackageCategory.objects.filter(packages=package).delete()
+                for cat_id in category_ids:
+                    if Category.objects.filter(id=cat_id).exists():
+                        PackageCategory.objects.create(packages=package, category_id=cat_id , created_by = request.user)
 
-            return Response(PackageSerializer(package).data)
+                return Response(PackageSerializer(package).data)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else : 
+            print(request.data)
+            serializer = PackageSerializer(package, data=data, partial=True)
+            if serializer.is_valid():
+                package = serializer.save(created_by = request.user)
+                return Response(PackageSerializer(package).data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def delete(self, request, pk):
+        package = get_object_or_404(Packages, pk=pk)
+
+        # Optional: delete related PackageCategory rows
+        PackageCategory.objects.filter(packages=package).delete()
+
+        # Delete the package itself
+        package.delete()
+
+        return Response({"detail": "Package deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
 class UserPackageAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
@@ -82,32 +93,32 @@ class UserPackageAPIView(APIView):
         serializer = UserPackageSerializer(user_packages, many=True)
         return Response(serializer.data)
     def post(self, request):
-            user = request.user
-            purchases = request.data.get("purchases")  # expects a list of packages
+        user = request.user
+        purchases = request.data.get("purchases")  # expects a list of packages
+        print(purchases)
+        if not purchases or not isinstance(purchases, list):
+            return Response({"purchases": "Provide a list of packages to buy."}, status=400)
 
-            if not purchases or not isinstance(purchases, list):
-                return Response({"purchases": "Provide a list of packages to buy."}, status=400)
+        created_packages = []
 
-            created_packages = []
+        for item in purchases:
+            package_id = item.get("package_id")
+            payment_id = item.get("payment_id")
+            if not package_id or not payment_id:
+                continue  # skip invalid items
 
-            for item in purchases:
-                package_id = item.get("package_id")
-                payment_id = item.get("payment_id")
-                if not package_id or not payment_id:
-                    continue  # skip invalid items
+            try:
+                package = Packages.objects.get(id=package_id)
+            except Packages.DoesNotExist:
+                continue  # skip invalid package
 
-                try:
-                    package = Packages.objects.get(id=package_id)
-                except Packages.DoesNotExist:
-                    continue  # skip invalid package
+            user_package = UserPackage.objects.create(
+                package=package,
+                payment_id=payment_id,
+                is_active=True,
+                created_by = request.user
+            )
+            created_packages.append(user_package)
 
-                user_package = UserPackage.objects.create(
-                    user=user,
-                    package=package,
-                    payment_id=payment_id,
-                    is_active=True
-                )
-                created_packages.append(user_package)
-
-            serializer = UserPackageSerializer(created_packages, many=True)
-            return Response(serializer.data, status=201)
+        serializer = UserPackageSerializer(created_packages, many=True)
+        return Response(serializer.data, status=201)

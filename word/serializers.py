@@ -24,7 +24,7 @@ class Wordsserializer(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
     class Meta:
         model = Words
-        fields = ['id' , 'title' , 'image' , 'description' , 'category']
+        fields = ['id' , 'title' , 'image' , 'description' , 'category' , 'favorite']
         depth = 1
         ordering = ['title']
         read_only_fields = ['category[image]']
